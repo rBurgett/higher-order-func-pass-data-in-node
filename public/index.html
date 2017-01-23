@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Using Higher Order Functions to Pass Items in Node</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <h1>Names!</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-5 col-sm-7">
+                <form>
+                    <div class="form-group">
+                        <input id="js-nameInput" type="text" class="form-control" required autofocus></input>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Submit Name</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-5 col-sm-7">
+                <div id="js-nameList" class="list-group">
+                    <!--li class="list-group-item">Something</li-->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/superagent/3.3.2/superagent.min.js" integrity="sha256-yAHdkJCjJZWFRdDSBmBVYSf/j3BDfBQXX8gZBY1x3D8=" crossorigin="anonymous"></script>
+    <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+
+    <script type="text/javascript">
+        const request = superagent;
+        $(document).ready(() => {
+            var socket = io(location.origin);
+
+            socket.on('names', data => {
+                const namesHTML = data
+                    .sort((a, b) => a.date === b.date ? 0 : a.date > b.date ? -1 : 1)
+                    .map(obj => {
+                        return `<li class="list-group-item">${obj.name}</li>`;
+                    });
+                $('#js-nameList').html(namesHTML);
+            });
+
+            socket.on('error', err => console.error(err));
+
+            $('form').on('submit', e => {
+                e.preventDefault();
+                const name = $('#js-nameInput').val();
+                socket.emit('name', name);
+                $('form')[0].reset();
+            });
+        });
+    </script>
+
+</body>
+
+</html>
